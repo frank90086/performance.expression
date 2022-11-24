@@ -54,6 +54,38 @@ public class Benchmark
         
         // Console.WriteLine($"{nameof(GetValueByExpression)}: {result}");
     }
+
+    [Benchmark]
+    public void GetValueByExpressionGeneric()
+    {
+        GetValueByExpressionGeneric<User>();
+    }
+    
+    private void GetValueByExpressionGeneric<T>()
+    {
+        var parameter = Expression.Parameter(typeof(T));
+        var accessor = Expression.PropertyOrField(parameter, Value);
+
+        var lambda = Expression.Lambda(accessor, false, parameter);
+        var result = lambda.Compile().DynamicInvoke(_user);
+
+        // Console.WriteLine($"{nameof(GetValueByExpressionGeneric)}: {result}");
+    }
+
+    [Benchmark]
+    public void GetValueByReflection()
+    {
+        GetValueByReflection<User>();
+    }
+    
+    private void GetValueByReflection<T>()
+    {
+        var type = typeof(T);
+        var propertyInfo = type.GetProperty(Value);
+        var result = propertyInfo?.GetValue(_user);
+
+        // Console.WriteLine($"{nameof(GetValueByReflection)}: {result}");
+    }
 }
 
 public record User(string Name, int Age);
